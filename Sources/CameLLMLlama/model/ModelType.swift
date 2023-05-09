@@ -5,6 +5,7 @@
 //  Created by Alex Rozanski on 02/04/2023.
 //
 
+import CameLLM
 import Foundation
 
 public enum ModelType {
@@ -13,19 +14,26 @@ public enum ModelType {
   case size13B
   case size30B
   case size65B
+}
 
-  public var numPyTorchModelParts: Int {
-    switch self {
-    case .unknown:
-      return 0
-    case .size7B:
-      return 1
-    case .size13B:
-      return 2
-    case .size30B:
-      return 4
-    case .size65B:
-      return 8
+public extension ModelType {
+  static func from(parameters: ParameterSize) -> ModelType? {
+    if parameters == .billions(Decimal(7)) {
+      return .size7B
     }
+
+    if parameters == .billions(Decimal(13)) {
+      return .size13B
+    }
+
+    if parameters == .billions(Decimal(30)) {
+      return .size30B
+    }
+
+    if parameters == .billions(Decimal(65)) {
+      return .size65B
+    }
+
+    return .unknown
   }
 }
