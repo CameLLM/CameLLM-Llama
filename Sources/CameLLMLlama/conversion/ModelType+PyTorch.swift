@@ -8,10 +8,10 @@
 import Foundation
 
 public extension ModelType {
-  var numPyTorchModelParts: Int {
+  var numPyTorchModelParts: Int? {
     switch self {
     case .unknown:
-      return 0
+      return nil
     case .size7B:
       return 1
     case .size13B:

@@ -91,7 +91,9 @@ final class ConvertPyTorchToGgmlConversion: ModelConversion {
   }
 
   private static func requiredFilesWithLocations(for data: ConvertPyTorchToGgmlConversionData) -> [FileLocation] {
-    let checkpointFiles = (0..<data.modelType.numPyTorchModelParts).map { checkpointFileName(i: $0) }
+    guard let numModelFiles = data.modelType.numPyTorchModelParts else { return [] }
+
+    let checkpointFiles = (0..<numModelFiles).map { checkpointFileName(i: $0) }
     let expectedFilesInDirectory = [paramsFileName] + checkpointFiles
     let expectedFilesInParentDirectory = [tokenizerFileName]
     return expectedFilesInDirectory.map {
