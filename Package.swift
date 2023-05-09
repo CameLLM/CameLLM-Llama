@@ -17,7 +17,7 @@ let package = Package(
     .package(url: "https://github.com/CameLLM/CameLLM", branch: "main"),
     .package(url: "https://github.com/CameLLM/CameLLM-Plugin-Harness", branch: "main"),
     .package(url: "https://github.com/CameLLM/CameLLM-Common", branch: "main"),
-    .package(url: "https://github.com/alexrozanski/Coquille.git", branch: "v0.3")
+    .package(url: "https://github.com/alexrozanski/Coquille.git", from: "0.3.0")
   ],
   targets: [
     .target(

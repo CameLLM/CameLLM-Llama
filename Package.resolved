@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/CameLLM/CameLLM-Plugin-Harness",
         "state": {
           "branch": "main",
-          "revision": "63d8f7241b9921c8103bc832d1edd8fdd1c2c59f",
+          "revision": "92bd1acb24faeda4deaf0beefdfa3b24f759dd79",
           "version": null
         }
       },
@@ -32,9 +32,9 @@
         "package": "Coquille",
         "repositoryURL": "https://github.com/alexrozanski/Coquille.git",
         "state": {
-          "branch": "v0.3",
-          "revision": "4250068ef7d259e0023c099be58459e5d7dbcedd",
-          "version": null
+          "branch": null,
+          "revision": "cb28716215a56760c66a4f635a1f71d6a2e2a42a",
+          "version": "0.3.0"
         }
       }
     ]
