@@ -21,18 +21,18 @@ public final class LlamaFamilyModelCard: ModelCard {
   init(modelType: ModelType) {
     self.modelType = modelType
 
-    let parameters: Int64
+    let parameters: ParameterSize
     switch modelType {
     case .unknown:
-      parameters = 0
+      parameters = .billions(Decimal(0))
     case .size7B:
-      parameters = 7000000000
+      parameters = .billions(Decimal(7))
     case .size13B:
-      parameters = 13000000000
+      parameters = .billions(Decimal(13))
     case .size30B:
-      parameters = 30000000000
+      parameters = .billions(Decimal(30))
     case .size65B:
-      parameters = 65000000000
+      parameters = .billions(Decimal(65))
     }
 
     super.init(parameters: parameters)
