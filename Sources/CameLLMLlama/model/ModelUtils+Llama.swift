@@ -39,7 +39,7 @@ public final class LlamaFamilyModelCard: ModelCard {
   }
 }
 
-public class LlamaFamilyModelUtils: ModelTypeScopedUtils {
+public class LlamaFamilyModelUtils: ModelTypeScopedValidationUtils, ModelTypeScopedCardUtils {
   public func getModelCard(forFileAt fileURL: URL) throws -> LlamaFamilyModelCard? {
     var modelType: _LlamaModelType = .typeUnknown
     try _LlamaModelUtils.loadModelTypeForFile(at: fileURL, outModelType: &modelType)
