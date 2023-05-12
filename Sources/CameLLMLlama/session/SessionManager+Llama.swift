@@ -15,23 +15,9 @@ public extension SessionManager {
 }
 
 public class LlamaFamilySessionManager {
-  public func makeLlamaSession(
+  public func makeSession(
     with modelURL: URL,
-    config: LlamaSessionConfig
-  ) -> any Session<LlamaSessionState, LlamaPredictionState> {
-    return LlamaSession(modelURL: modelURL, paramsBuilder: config)
-  }
-
-  public func makeAlpacaSession(
-    with modelURL: URL,
-    config: AlpacaSessionConfig
-  ) -> any Session<LlamaSessionState, LlamaPredictionState> {
-    return LlamaSession(modelURL: modelURL, paramsBuilder: config)
-  }
-
-  public func makeGPT4AllSession(
-    with modelURL: URL,
-    config: GPT4AllSessionConfig
+    config: SessionConfig
   ) -> any Session<LlamaSessionState, LlamaPredictionState> {
     return LlamaSession(modelURL: modelURL, paramsBuilder: config)
   }

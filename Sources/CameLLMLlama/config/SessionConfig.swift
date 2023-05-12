@@ -38,7 +38,9 @@ public struct Hyperparameters {
   }
 }
 
-public class SessionConfig {
+// MARK: -
+
+public final class SessionConfig: ObjCxxParamsBuilder {
   // Seed for generation
   public private(set) var seed: Int32?
 
@@ -54,22 +56,57 @@ public class SessionConfig {
   // Model configuration
   public private(set) var hyperparameters: Hyperparameters
 
-  public let reversePrompt: String?
+  // Internal properties
+  internal private(set) var mode: _LlamaSessionMode
+  internal private(set) var initialPrompt: String?
+  internal private(set) var promptPrefix: String?
+  internal private(set) var promptSuffix: String?
+  internal private(set) var antiprompt: String?
 
-  required init(
+  init(
+    mode: _LlamaSessionMode,
     seed: Int32? = nil,
     numThreads: UInt,
     numTokens: UInt,
     keepModelInMemory: Bool,
     hyperparameters: Hyperparameters,
-    reversePrompt: String?
+    initialPrompt: String?,
+    promptPrefix: String?,
+    promptSuffix: String?,
+    antiprompt: String?
   ) {
+    self.mode = mode
     self.seed = seed
     self.numThreads = numThreads
     self.numTokens = numTokens
     self.keepModelInMemory = keepModelInMemory
     self.hyperparameters = hyperparameters
-    self.reversePrompt = reversePrompt
+    self.initialPrompt = initialPrompt
+    self.promptPrefix = promptPrefix
+    self.promptSuffix = promptSuffix
+    self.antiprompt = antiprompt
+  }
+
+  func build(for modelURL: URL) -> _LlamaSessionParams {
+    let params = _LlamaSessionParams.defaultParams(withModelPath: modelURL.path, mode: .regular)
+    params.numberOfThreads = Int32(numThreads)
+    params.numberOfTokens = Int32(numTokens)
+
+    if let seed = seed { params.seed = seed }
+    params.contextSize = Int32(hyperparameters.contextSize)
+    params.batchSize = Int32(hyperparameters.batchSize)
+    params.lastNTokensToPenalize = Int32(hyperparameters.lastNTokensToPenalize)
+    params.topP = Float(hyperparameters.topP)
+    params.topK = Int32(hyperparameters.topK)
+    params.temp = Float(hyperparameters.temperature)
+    params.repeatPenalty = Float(hyperparameters.repeatPenalty)
+
+    params.initialPrompt = initialPrompt
+    params.promptPrefix = promptPrefix
+    params.promptSuffix = promptSuffix
+    params.antiprompts = [antiprompt].compactMap { $0 }
+
+    return params
   }
 }
 
@@ -138,17 +175,23 @@ public class HyperparametersBuilder {
   }
 }
 
-public class SessionConfigBuilder<T> where T: SessionConfig {
+// MARK: -
+
+public class SessionConfigBuilder {
+  public private(set) var mode: _LlamaSessionMode?
   public private(set) var seed: Int32??
   public private(set) var numThreads: UInt?
   public private(set) var numTokens: UInt?
   public private(set) var keepModelInMemory: Bool?
   public private(set) var hyperparameters: HyperparametersBuilder
-  public private(set) var reversePrompt: String??
+  public private(set) var initialPrompt: String??
+  public private(set) var promptPrefix: String??
+  public private(set) var promptSuffix: String??
+  public private(set) var antiprompt: String??
 
   private let defaults: SessionConfig
 
-  public init(defaults: SessionConfig) {
+  init(defaults: SessionConfig) {
     self.hyperparameters = HyperparametersBuilder(defaults: defaults.hyperparameters)
     self.defaults = defaults
   }
@@ -178,51 +221,52 @@ public class SessionConfigBuilder<T> where T: SessionConfig {
     return self
   }
 
-  public func withReversePrompt(_ reversePrompt: String??) -> Self {
-    self.reversePrompt = reversePrompt
+  public func withInitialPrompt(_ initialPrompt: String??) -> Self {
+    self.initialPrompt = initialPrompt
     return self
   }
 
-  public func build() -> T {
-    return T.init(
+  public func withPromptPrefix(_ promptPrefix: String??) -> Self {
+    self.promptPrefix = promptPrefix
+    return self
+  }
+
+  public func withPromptSuffix(_ promptSuffix: String??) -> Self {
+    self.promptSuffix = promptSuffix
+    return self
+  }
+
+  public func withAntiprompt(_ antiprompt: String??) -> Self {
+    self.antiprompt = antiprompt
+    return self
+  }
+
+  // MARK: - Internal
+
+  func withMode(_ mode: _LlamaSessionMode?) -> Self {
+    self.mode = mode
+    return self
+  }
+
+  // MARK: - Build
+
+  public func build() -> SessionConfig {
+    return SessionConfig(
+      mode: mode ?? .instructional,
       seed: seed ?? defaults.seed,
       numThreads: numThreads ?? defaults.numThreads,
       numTokens: numTokens ?? defaults.numTokens,
       keepModelInMemory: keepModelInMemory ?? defaults.keepModelInMemory,
       hyperparameters: hyperparameters.build(),
-      reversePrompt: reversePrompt ?? defaults.reversePrompt
+      initialPrompt: initialPrompt ?? defaults.initialPrompt,
+      promptPrefix: promptPrefix ?? defaults.promptPrefix,
+      promptSuffix: promptSuffix ?? defaults.promptSuffix,
+      antiprompt: antiprompt ?? defaults.antiprompt
     )
   }
 }
 
 // MARK: - Params Builders
-
-class SessionConfigParamsBuilder: ObjCxxParamsBuilder {
-  let sessionConfig: SessionConfig
-  let mode: _LlamaSessionMode
-
-  init(sessionConfig: SessionConfig, mode: _LlamaSessionMode) {
-    self.mode = mode
-    self.sessionConfig = sessionConfig
-  }
-
-  func build(for modelURL: URL) -> _LlamaSessionParams {
-    let params = _LlamaSessionParams.defaultParams(withModelPath: modelURL.path, mode: mode)
-    params.numberOfThreads = Int32(sessionConfig.numThreads)
-    params.numberOfTokens = Int32(sessionConfig.numTokens)
-
-    if let seed = sessionConfig.seed { params.seed = seed }
-    params.contextSize = Int32(sessionConfig.hyperparameters.contextSize)
-    params.batchSize = Int32(sessionConfig.hyperparameters.batchSize)
-    params.lastNTokensToPenalize = Int32(sessionConfig.hyperparameters.lastNTokensToPenalize)
-    params.topP = Float(sessionConfig.hyperparameters.topP)
-    params.topK = Int32(sessionConfig.hyperparameters.topK)
-    params.temp = Float(sessionConfig.hyperparameters.temperature)
-    params.repeatPenalty = Float(sessionConfig.hyperparameters.repeatPenalty)
-
-    return params
-  }
-}
 
 extension SessionConfig {
   static var defaultNumThreads: UInt {
@@ -237,6 +281,7 @@ extension SessionConfig {
 let defaultSessionConfig = {
   let params = _LlamaSessionParams.defaultParams(withModelPath: "", mode: .regular)
   return SessionConfig(
+    mode: .instructional,
     seed: params.seed == -1 ? nil : params.seed,
     numThreads: UInt(params.numberOfThreads),
     numTokens: UInt(params.numberOfTokens),
@@ -250,6 +295,9 @@ let defaultSessionConfig = {
       temperature: Double(params.temp),
       repeatPenalty: Double(params.repeatPenalty)
     ),
-    reversePrompt: nil
+    initialPrompt: nil,
+    promptPrefix: nil,
+    promptSuffix: nil,
+    antiprompt: nil
   )
 }()
