@@ -8,6 +8,14 @@
 import Foundation
 
 public extension SessionConfig {
+  static var defaults: SessionConfig {
+    return configurableDefaults().build()
+  }
+
+  static func configurableDefaults() -> SessionConfigBuilder {
+    return SessionConfigBuilder(defaults: defaultSessionConfig)
+  }
+
   static var alpaca: SessionConfig {
     return configurableAlpaca().build()
   }
