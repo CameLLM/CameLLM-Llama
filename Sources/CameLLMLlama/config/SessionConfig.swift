@@ -41,6 +41,20 @@ public struct Hyperparameters {
 // MARK: -
 
 public final class SessionConfig: ObjCxxParamsBuilder {
+  public enum Mode {
+    case regular
+    case instructional
+
+    func toObjCxxMode() -> _LlamaSessionMode {
+      switch self {
+      case .regular: return .regular
+      case .instructional: return .instructional
+      }
+    }
+  }
+
+  public private(set) var mode: Mode
+
   // Seed for generation
   public private(set) var seed: Int32?
 
@@ -56,15 +70,13 @@ public final class SessionConfig: ObjCxxParamsBuilder {
   // Model configuration
   public private(set) var hyperparameters: Hyperparameters
 
-  // Internal properties
-  internal private(set) var mode: _LlamaSessionMode
-  internal private(set) var initialPrompt: String?
-  internal private(set) var promptPrefix: String?
-  internal private(set) var promptSuffix: String?
-  internal private(set) var antiprompt: String?
+  public private(set) var initialPrompt: String?
+  public private(set) var promptPrefix: String?
+  public private(set) var promptSuffix: String?
+  public private(set) var antiprompt: String?
 
   init(
-    mode: _LlamaSessionMode,
+    mode: Mode,
     seed: Int32? = nil,
     numThreads: UInt,
     numTokens: UInt,
@@ -88,7 +100,7 @@ public final class SessionConfig: ObjCxxParamsBuilder {
   }
 
   func build(for modelURL: URL) -> _LlamaSessionParams {
-    let params = _LlamaSessionParams.defaultParams(withModelPath: modelURL.path, mode: .regular)
+    let params = _LlamaSessionParams.defaultParams(withModelPath: modelURL.path, mode: mode.toObjCxxMode())
     params.numberOfThreads = Int32(numThreads)
     params.numberOfTokens = Int32(numTokens)
 
@@ -178,7 +190,7 @@ public class HyperparametersBuilder {
 // MARK: -
 
 public class SessionConfigBuilder {
-  public private(set) var mode: _LlamaSessionMode?
+  public private(set) var mode: SessionConfig.Mode?
   public private(set) var seed: Int32??
   public private(set) var numThreads: UInt?
   public private(set) var numTokens: UInt?
@@ -243,7 +255,7 @@ public class SessionConfigBuilder {
 
   // MARK: - Internal
 
-  func withMode(_ mode: _LlamaSessionMode?) -> Self {
+  public func withMode(_ mode: SessionConfig.Mode?) -> Self {
     self.mode = mode
     return self
   }
