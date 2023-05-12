@@ -208,7 +208,7 @@ public class SessionConfigBuilder {
     self.defaults = defaults
   }
 
-  public func withSeed(_ seed: Int32?) -> Self {
+  public func withSeed(_ seed: Int32??) -> Self {
     self.seed = seed
     return self
   }
